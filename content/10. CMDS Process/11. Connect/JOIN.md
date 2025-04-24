@@ -1,0 +1,88 @@
+---
+CMDS: DataBase
+type:
+  - note
+tags:
+  - "#DataBase"
+  - "#JOIN"
+관련 문서:
+  - "[[105.01 Basic Concept]]"
+category: content
+---
+## JOIN
+>[!define]
+> 모델링에 의해서 생성된 테이블 간 데이터를 연결하는 방식
+
+```sql
+SELECT * 
+FROM EMP, DEPT
+WHERE EMP.DEPTNO = DEPT.DEPTNO
+```
+
+- *결과가 나오는게 중요한게 아니라 올바른 결과가 나오는게 중요!*
+- *안나오는 데이터가 있는지, 나와야 하는데 없는 데이터가 있는지 확인하기*
+
+- #### EQUAL JOIN
+	- ##### CROSS JOIN
+		- 
+	- ##### INNER JOIN
+		- 연결되는 컬럼의 값이 같은 데이터만 출력
+	- ##### OUTER JOIN
+		- INNER JOIN으로 나와야 하는 데이터가 전부 나오고
+		- 주가 되는 테이블의 데이터는 연결되지 않아도 나와야 함
+		- LEFT OUTER JOIN
+		- RIGHT OUTER JOIN
+		- FULL OUTER JOIN (ORACLE)
+	- ##### NATURAL JOIN
+		- 컬럼명이 같으면 자동으로 JOIN 조건으로 설정 (*비추천*)
+	- ##### SELF JOIN
+		- 같은 테이블을 조인하는 기법
+- #### NON-EQUAL JOIN
+	- 값이 일치하지 않는 JOIN이 필요할 때
+
+```SQL
+-- CROSS JOIN
+SELECT *
+FROM EMP JOIN DEPT;
+
+-- INNER JOIN
+SELECT *
+FROM EMP A JOIN DEPT B ON (A.DEPTNO = B.DEPTNO);
+
+SELECT *
+FROM EMP A JOIN DEPT B USING (DEPTNO);
+
+-- OUTER JOIN
+-- LEFT OUTER JOIN
+SELECT A.ENAME, A.SAL, A.DEPTNO, B.DNAME
+FROM EMP A LEFT OUTER JOIN DEPT USING(DEPTNO);
+-- RIGHT OUTER JOIN
+SELECT A.ENAME, A.SAL, A.DEPTNO, B.DNAME
+FROM EMP A RIGHT OUTER JOIN DEPT USING(DEPTNO);
+-- FULL OUTER JOIN
+SELECT A.ENAME, A.SAL, A.DEPTNO, B.DNAME
+FROM EMP A FULL OUTER JOIN DEPT USING(DEPTNO);
+
+-- NATURAL JOIN
+SELECT EMP.ENAME, EMP.SAL, EMP.DEPTNO, DEPT.DNAME
+FROM EMP NATURAL JOIN DEPT;
+
+-- SELF JOIN
+SELECT A.EMPNO, A.ENAME, A.DEPTNO, A.SAL, A.MGR, B.ENAME
+FROM EMP AS A/*사원 테이블*/ JOIN EMP AS B/*관리자 테이블*/ ON (A.MGR=B.EMPNO);
+
+-- NON EQUAL JOIN
+SELECT A.ENAME, A.SAL, B.GRADE
+FROM EMP AS A JOIN SALGRADE AS B ON (A.SAL BETWEEN B.LOSAL AND B.HISAL);
+
+-- 모든 사원의 사번, 이름, 급여, 급여등급, 부서명, 관리자명, 관리자급여, 관리자급여등급 구하기
+SELECT A.EMPNO AS 사번, A.ENAME AS 이름, A.SAL AS 급여,
+		C.GRADE AS 급여등급,
+		B.DNAME AS 부서명,
+		D.ENAME AS 관리자명, D.SAL AS 관리자급여,
+		E.GRADE AS 관리자급여등급
+FROM EMP A LEFT OUTER JOIN DEPT B USING (DEPTNO)
+		JOIN SALGRADE C ON (A.SAL BETWEEN C.LOSAL AND C.HISAL)
+		LEFT OUTER JOIN EMP D ON (A.MGR = D.EMPNO)
+		LEFT OUTER JOIN SALGRADE E ON (D.SAL BETWEEN E.LOSAL AND E.HISAL);
+```
